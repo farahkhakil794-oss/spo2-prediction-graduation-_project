@@ -3,41 +3,99 @@ import pickle
 import pandas as pd
 import numpy as np
 
-# إعدادات الصفحة
-st.set_page_config(page_title="SpO2 Prediction", layout="wide")
+# إعدادات الصفحة لتكون متناسقة واحترافية
+st.set_page_config(page_title="SpO2 Prediction System", layout="wide")
 
-# تصميم واجهة مخصصة بالـ CSS لتبدو احترافية
+# تصميم واجهة مخصصة بالـ CSS لتطابق الألوان والستايل الأزرق بدقة
 st.markdown("""
     <style>
-    .main-title {
-        font-size: 32px;
-        font-weight: bold;
-        color: #1E3A8A;
+    /* تصميم الهيدر الأزرق الكبير في أعلى الصفحة */
+    .hero-banner {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        padding: 40px;
+        border-radius: 15px;
         text-align: center;
+        color: white;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        position: relative;
+    }
+    .hero-banner h1 {
+        font-size: 36px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: white !important;
+    }
+    .hero-banner p {
+        font-size: 18px;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+    /* تصميم العناوين الجانبية */
+    .section-title {
+        font-size: 22px;
+        font-weight: bold;
+        color: #1e3c72;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    /* تعديل صناديق الإدخال لتبدو متناسقة */
+    div.stNumberInput input {
+        border-radius: 8px !important;
+        border: 1px solid #cbd5e1 !important;
+        padding: 10px !important;
+    }
+    /* تصميم زر التوقع الأزرق المحترف */
+    div.stButton > button {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+        color: white !important;
+        font-size: 20px !important;
+        font-weight: bold !important;
+        padding: 15px 30px !important;
+        border-radius: 10px !important;
+        border: none !important;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3) !important;
+        transition: all 0.3s ease !important;
+    }
+    div.stButton > button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 15px rgba(37, 99, 235, 0.4) !important;
+    }
+    /* صندوق عرض النتيجة النهاییة المميز */
+    .result-box {
+        background-color: #f0fdf4;
+        border: 2px solid #bbf7d0;
+        padding: 25px;
+        border-radius: 12px;
+        text-align: center;
+        margin-top: 25px;
+    }
+    .result-box h2 {
+        color: #166534 !important;
+        font-size: 28px;
         margin-bottom: 5px;
     }
-    .sub-title {
-        font-size: 18px;
-        color: #4B5563;
-        text-align: center;
-        margin-bottom: 30px;
-    }
-    .section-header {
-        font-size: 20px;
+    .result-box p {
+        font-size: 38px;
         font-weight: bold;
-        color: #2563EB;
-        border-bottom: 2px solid #DBEAFE;
-        padding-bottom: 8px;
-        margin-top: 20px;
-        margin-bottom: 15px;
+        color: #15803d;
+        margin: 0;
     }
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="main-title">المنظومة الذكية لتقدير نسبة الأكسجين (SpO2)</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">مشروع تخرج مبتكر يعتمد على إشارات الـ PPG والتعلم الآلي المتطور</div>', unsafe_allow_html=True)
+# عرض الهيدر الاحترافي باللون الأزرق المتدرج في المقدمة
+st.markdown("""
+    <div class="hero-banner">
+        <h1>المنظومة الذكية لتقدير نسبة الأكسجين (SpO2)</h1>
+        <p>مشروع تخرج مبتكر يعتمد على إشارات الـ PPG والتعلم الآلي المتطور</p>
+    </div>
+""", unsafe_allow_html=True)
 
-# تحميل الموديل
+# تحميل موديل XGBoost المخزن
 @st.cache_resource
 def load_model():
     return pickle.load(open('best_spo2_model (3).pkl', 'rb'))
@@ -47,41 +105,41 @@ try:
 except Exception as e:
     st.error(f"خطأ في تحميل الموديل: {e}")
 
-st.markdown('<div class="section-header">📊 العوامل الحيوية للمريض (XGBoost Inputs)</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">📊 العوامل الحيوية للمريض (XGBoost Inputs)</div>', unsafe_allow_html=True)
 
-# تقسيم المدخلات على شكل سلايدرز في عمودين متناسقين
+# تقسيم المدخلات في عمودين متناسقين باستخدام صناديق الأرقام (Number Inputs)
 col1, col2 = st.columns(2)
 
 with col1:
-    age = st.slider("العمر (Age)", min_value=1.0, max_value=100.0, value=64.0, step=1.0)
+    age = st.number_input("العمر (Age)", min_value=1.0, max_value=120.0, value=64.0, step=1.0)
     family_history_cad = st.selectbox("التاريخ العائلي لأمراض الشرايين التاجية (Family History CAD)", [0, 1], help="0 = لا يوجد، 1 = يوجد")
-    noise_level_db = st.slider("مستوى الضوضاء (Noise Level dB)", min_value=-100.0, max_value=0.0, value=-37.6, step=0.1)
-    pulse_rate_bpm = st.slider("معدل النبض (Pulse Rate BPM)", min_value=30.0, max_value=200.0, value=70.0, step=0.1)
-    pulse_transit_time_ms = st.slider("زمن انتقال النبضة (Pulse Transit Time ms)", min_value=100.0, max_value=500.0, value=238.0, step=1.0)
-    augmentation_index_pct = st.slider("مؤشر التضخيم (Augmentation Index %)", min_value=-50.0, max_value=100.0, value=10.3, step=0.1)
-    stiffness_index_m_s = st.slider("مؤشر الصلابة (Stiffness Index m/s)", min_value=1.0, max_value=25.0, value=8.67, step=0.01)
-    reflection_index_pct = st.slider("مؤشر الانعكاس (Reflection Index %)", min_value=0.0, max_value=100.0, value=50.0, step=0.1)
-    systolic_peak_amplitude = st.slider("سعة الذروة الانقباضية (Systolic Peak Amplitude)", min_value=0.0, max_value=5.0, value=0.7094, step=0.0001)
+    noise_level_db = st.number_input("مستوى الضوضاء (Noise Level dB)", value=-37.6, format="%.2f")
+    pulse_rate_bpm = st.number_input("معدل النبض (Pulse Rate BPM)", min_value=30.0, max_value=220.0, value=70.0, format="%.2f")
+    pulse_transit_time_ms = st.number_input("زمن انتقال النبضة (Pulse Transit Time ms)", min_value=50.0, max_value=600.0, value=238.0, step=1.0)
+    augmentation_index_pct = st.number_input("مؤشر التضخيم (Augmentation Index %)", value=10.3, format="%.2f")
+    stiffness_index_m_s = st.number_input("مؤشر الصلابة (Stiffness Index m/s)", value=8.67, format="%.2f")
+    reflection_index_pct = st.number_input("مؤشر الانعكاس (Reflection Index %)", value=50.0, format="%.2f")
+    systolic_peak_amplitude = st.number_input("سعة الذروة الانقباضية (Systolic Peak Amplitude)", value=0.7094, format="%.4f")
 
 with col2:
-    diastolic_peak_amplitude = st.slider("سعة الذروة الانبساطية (Diastolic Peak Amplitude)", min_value=0.0, max_value=5.0, value=0.4069, step=0.0001)
-    peak_to_peak_interval_ms = st.slider("الفترة بين الذروتين (Peak-to-Peak Interval ms)", min_value=300.0, max_value=1500.0, value=855.9, step=0.1)
-    pulse_wave_velocity_m_s = st.slider("سرعة موجة النبض (Pulse Wave Velocity m/s)", min_value=1.0, max_value=25.0, value=8.64, step=0.01)
-    perfusion_index_pct = st.slider("معامل الإرواء (Perfusion Index %)", min_value=0.0, max_value=20.0, value=4.26, step=0.01)
-    systolic_upstroke_time_ms = st.slider("زمن الصعود الانقباضي (Systolic Upstroke Time ms)", min_value=10.0, max_value=300.0, value=72.4, step=0.1)
-    diastolic_time_ms = st.slider("الزمن الانبساطي (Diastolic Time ms)", min_value=100.0, max_value=1200.0, value=521.9, step=0.1)
-    crest_time_ratio = st.slider("نسبة زمن القمة (Crest Time Ratio)", min_value=0.0, max_value=1.0, value=0.1218, step=0.0001)
-    ppg_signal_quality = st.slider("جودة إشارة الـ PPG (PPG Signal Quality)", min_value=0.0, max_value=1.0, value=0.7, step=0.01)
-    motion_artifact_score = st.slider("مؤشر حركة المريض المشوشة (Motion Artifact Score)", min_value=0.0, max_value=5.0, value=0.26, step=0.01)
+    diastolic_peak_amplitude = st.number_input("سعة الذروة الانبساطية (Diastolic Peak Amplitude)", value=0.4069, format="%.4f")
+    peak_to_peak_interval_ms = st.number_input("الفترة بين الذروتين (Peak-to-Peak Interval ms)", value=855.9, format="%.2f")
+    pulse_wave_velocity_m_s = st.number_input("سرعة موجة النبض (Pulse Wave Velocity m/s)", value=8.64, format="%.2f")
+    perfusion_index_pct = st.number_input("معامل الإرواء (Perfusion Index %)", value=4.26, format="%.2f")
+    systolic_upstroke_time_ms = st.number_input("زمن الصعود الانقباضي (Systolic Upstroke Time ms)", value=72.4, format="%.2f")
+    diastolic_time_ms = st.number_input("الزمن الانبساطي (Diastolic Time ms)", value=521.9, format="%.2f")
+    crest_time_ratio = st.number_input("نسبة زمن القمة (Crest Time Ratio)", value=0.1218, format="%.4f")
+    ppg_signal_quality = st.number_input("جودة إشارة الـ PPG (PPG Signal Quality)", min_value=0.0, max_value=1.0, value=0.70, format="%.2f")
+    motion_artifact_score = st.number_input("مؤشر حركة المريض المشوشة (Motion Artifact Score)", value=0.26, format="%.2f")
     
     site_input = st.selectbox("مكان القياس (Measurement Site)", ["Fingertip", "Wrist"])
     measurement_site = 0 if site_input == "Fingertip" else 1
 
-st.markdown("<br><hr>", unsafe_allow_html=True)
+st.markdown("<br><br>", unsafe_allow_html=True)
 
-# زر التوقع بتصميم واضح
+# زر التوقع الكبير المتناسق باللون الأزرق المميز
 if st.button("🔮 تشغيل محرك التوقع اللحظي", use_container_width=True):
-    # تجميع المدخلات بنفس الترتيب تماماً
+    # تجميع المدخلات في DataFrame بنفس الترتيب الذي يحتاجه الموديل
     input_data = pd.DataFrame({
         'age': [age],
         'family_history_cad': [family_history_cad],
@@ -105,12 +163,19 @@ if st.button("🔮 تشغيل محرك التوقع اللحظي", use_container
     })
     
     try:
-        # حساب التوقع
+        # حساب التوقع باستخدام الموديل الخاص بكِ
         prediction = model.predict(input_data)
         
-        # عرض النتيجة بشكل ضخم ومميز
+        # تأثير الاحتفال بالنجاح
         st.balloons()
-        st.metric(label="نسبة الأكسجين المتوقعة بالدم SpO2", value=f"{prediction[0]:.2f} %")
+        
+        # عرض النتيجة داخل كادر ملون رائع في منتصف الصفحة
+        st.markdown(f"""
+            <div class="result-box">
+                <h2>نسبة الأكسجين المتوقعة بالدم SpO2</h2>
+                <p>{prediction[0]:.2f} %</p>
+            </div>
+        """, unsafe_allow_html=True)
         
     except Exception as e:
         st.error(f"حدث خطأ أثناء حساب التوقع: {e}")
